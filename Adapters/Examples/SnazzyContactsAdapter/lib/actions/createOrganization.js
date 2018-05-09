@@ -18,8 +18,7 @@ limitations under the License.
 const Q = require('q');
 const request = require('request-promise');
 const messages = require('elasticio-node').messages;
-
-const snazzy = require('./snazzy.js');
+const snazzy = require('./snazzy');
 const BASE_URI = `https://snazzycontacts.com/mp_contact/json_respond`;
 
 exports.process = processAction;
@@ -30,28 +29,24 @@ exports.process = processAction;
  * @param msg incoming message object that contains ``body`` with payload
  * @param cfg configuration that is account information and configuration field values
  */
-
 function processAction(msg, cfg) {
 
-  let reply = [];
-  const self = this;
-
-  // Create a session in snazzycontacts and then make a post request to create a new organization in snazzycontacts
   snazzy.createSession(cfg, () => {
     if (cfg.mp_cookie) {
 
-      const apiKey = cfg.apikey;
-      const cookie = cfg.mp_cookie;
+      const self = this;
+      const { apikey } = cfg;
+      const { mp_cookie: cookie } = cfg;
       let existingRowid = 0;
+      let reply = [];
 
       function checkForExistingOrganization() {
-
         return new Promise((resolve, reject) => {
           const requestOptions = {
             uri: `${BASE_URI}/address_company/json_mainview?&mp_cookie=${cookie}`,
             json: true,
             headers: {
-              'X-API-KEY': apiKey
+              'X-API-KEY': apikey
             }
           };
 
@@ -64,16 +59,6 @@ function processAction(msg, cfg) {
                   console.log(`Organization alreday exists ... ROWID: ${existingRowid}`);
                 }
               });
-
-              // if (existingRowid == 0) {
-              //   // uri = `${path}/mp_contact/json_respond/address_company/json_insert?&mp_cookie=${cookie}`;
-              //   console.log('Creating an organization ...');
-              // } else {
-              //   msg.body.rowid = existingRowid;
-              //   // uri = `${path}/mp_contact/json_respond/address_company/json_update?mp_cookie=${cookie}`;
-              //   console.log(`existingRowid: ${existingRowid}`);
-              // }
-
               resolve(existingRowid);
             }).catch((e) => {
               reject(e);
@@ -82,13 +67,11 @@ function processAction(msg, cfg) {
       }
 
       function createOrganization() {
-        console.log(`eixisting rowid ${existingRowid}`);
-
         return new Promise((resolve, reject) => {
           const options = {
             json: msg.body,
             headers: {
-              'X-API-KEY': apiKey
+              'X-API-KEY': apikey
             }
           };
 
@@ -139,7 +122,6 @@ function processAction(msg, cfg) {
         .then(emitData)
         .fail(emitError)
         .done(emitEnd);
-
     }
   });
 }
