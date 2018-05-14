@@ -45,20 +45,21 @@ function processAction(msg, cfg) {
         return new Promise((resolve, reject) => {
           const requestOptions = {
             uri: `${BASE_URI}/address_contactperson/json_mainview?&mp_cookie=${cookie}`,
-            json: true,
+            json: {
+              "address_contactperson_name": msg.body.name,
+              "address_contactperson_firstname": msg.body.firstname
+            },
             headers: {
               'X-API-KEY': apikey
             }
           };
 
-          request.get(requestOptions)
+          request.post(requestOptions)
             .then((res) => {
               res.content.forEach((person) => {
-                if (msg.body.name == person.name) {
                   existingRowid = person.rowid;
                   msg.body.rowid = existingRowid;
-                  console.log(`Person already exists ... ROWID: ${existingRowid}`);
-                }
+                  console.log(`Person already exists ... ROWID: ${person.rowid} with first name ${person.firstname} and last name ${person.name}`);
               });
               resolve(existingRowid);
             }).catch((e) => {
