@@ -50,7 +50,7 @@ function processAction(msg, cfg) {
         }
       };
 
-      // Check if the organization alredy exists
+      // Check if the organization already exists
       function checkForExistingOrganization() {
         options.form = {
           method: 'get_all_companies',

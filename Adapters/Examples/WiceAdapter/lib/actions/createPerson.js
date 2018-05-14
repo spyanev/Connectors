@@ -51,7 +51,7 @@ function processAction(msg, cfg) {
         }
       };
 
-      // Check if the person alredy exists
+      // Check if the person already exists
       function checkForExistingUser() {
         options.form = {
           method: 'get_all_persons',
